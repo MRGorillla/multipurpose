@@ -1,0 +1,70 @@
+version: "3.8"
+services:
+  mongodb:
+    container_name: lavamusic-mongodb
+    image: mongo:latest
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongoadmin
+      MONGO_INITDB_ROOT_PASSWORD: mongopassword
+    restart: on-failure
+    volumes:
+      - mongodb_data:/data/db
+
+  lavalink:
+    container_name: lavamusic-lavalink
+    image: fredboat/lavalink:dev
+    environment:
+      SERVER_PORT: 443
+      SERVER_ADDRESS: 0.0.0.0
+      LAVALINK_SERVER_PASSWORD: "DevamOP"
+      LAVALINK_SERVER_SOURCES_YOUTUBE: 'true'
+      LAVALINK_SERVER_SOURCES_BANDCAMP: 'true'
+      LAVALINK_SERVER_SOURCES_SOUNDCLOUD: 'true'
+      LAVALINK_SERVER_SOURCES_TWITCH: 'true'
+      LAVALINK_SERVER_SOURCES_VIMEO: 'true'
+      LAVALINK_SERVER_SOURCES_HTTP: 'true'
+      LAVALINK_SERVER_SOURCES_LOCAL: 'false'
+      LAVALINK_SERVER_BUFFER_DURATION_MS: 400
+      LAVALINK_SERVER_FRAME_BUFFER_DURATIONS_MS: 5000
+      LAVALINK_SERVER_TRACK_STRUCK_THRESHOLD_MS: 10000
+      LAVALINK_SERVER_YOUTUBE_PLAYLIST_LOAD_LIMIT: 6
+      LAVALINK_SERVER_PLAYER_UPDATE_INTERVAL: 5
+      LAVALINK_SERVER_YOUTUBE_SEARCH_ENABLED: 'true'
+      LAVALINK_SERVER_SOUNDCLOUD_SEARCH_ENABLED: 'true'
+      #LAVALINK_SERVER_YOUTUBE_CONFIG_EMAIL:
+      #LAVALINK_SERVER_YOUTUBE_CONFIG_PASSWORD:
+      LAVALINK_SERVER_SENTRY_DSN: ""
+    restart: on-failure
+
+  lavamusic:
+    container_name: lavamusic
+    image: ghcr.io/brblacky/lavamusic:main
+    environment:
+     TOKEN: "MTA5MzUyMjQ1MzI1NjQ3NDc3NA.GqqKo8.0Sx95PX-efUGwqCVxgWfQJ4Wts8bwA46S5z0A8" # Your bot token
+     PREFIX: "!" # Your bot prefix
+     OWNER_IDS: "592924410583973899" # Your id
+     CLIENT_ID: "1093522453256474774" # Your bot id
+     GUILD_ID: "" # Your server Id if you want to use the for single server
+     PRODUCTION: "true" # true for production 
+     SEARCH_ENGINE: "ytsearch" # ytsearch, scsearch or ytmsearch
+     MAX_PLAYLIST_SIZE: "100" # Max playlist size
+     MAX_QUEUE_SIZE: "100" # Max queue size
+     DATABASE_URL: "mongodb://127.0.0.1:3306" # Your mongodb url
+     LAVALINK_URL: "lavalink.devamop.in" # Your lavalink url
+     LAVALINK_AUTH: "DevamOP" # Your lavalink password
+     LAVALINK_NAME: "Blacky" # Your lavalink name
+     LAVALINK_SECURE: "true" # true if you are using https
+    restart: on-failure
+    depends_on:
+      - lavalink
+      - mongodb
+    links:
+      - mongodb:db
+      - lavalink
+
+volumes:
+  mongodb_data:
+
+networks:
+  default:
+    name: net-lavamusic
